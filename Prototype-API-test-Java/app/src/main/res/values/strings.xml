@@ -1,0 +1,8 @@
+<resources>
+    <string name="app_name">J-G-Campus-test</string>
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hangman_page">gethangman.php</string>
+    <string name="authentication_page">auth.php </string>
+</resources>
