@@ -1,10 +1,13 @@
 package tn743.ufrrj.gcampus.j_g_campus_test.menuchallengesinprogress;
 
 import android.content.Context;
+import android.content.Intent;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 
+import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import org.w3c.dom.Text;
@@ -29,6 +32,10 @@ public class FunChallengeProgressViewHolder extends RecyclerView.ViewHolder impl
 
     @Override
     public void onClick(View v) {
-
+        int i = getAdapterPosition();
+        Log.d( "FunChallengeProgressViewHolder", "onClick " + Integer.toString(i) );
+        Intent intent = new Intent("selected-challenge");
+        intent.putExtra("parameter", i);
+        LocalBroadcastManager.getInstance(mContext).sendBroadcast(intent);
     }
 }

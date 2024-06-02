@@ -1,8 +1,13 @@
 package tn743.ufrrj.gcampus.j_g_campus_test.gui.frag;
 
+import android.content.BroadcastReceiver;
+import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.os.Bundle;
 
 import androidx.fragment.app.Fragment;
+import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
 import android.transition.TransitionInflater;
 import android.util.DisplayMetrics;
@@ -19,8 +24,7 @@ import android.util.Log;
 import java.util.Vector;
 
 import tn743.ufrrj.gcampus.j_g_campus_test.R;
-import tn743.ufrrj.gcampus.j_g_campus_test.gui.frag.GuessWorldFragment;
-import tn743.ufrrj.gcampus.j_g_campus_test.logic.BagResources;
+import tn743.ufrrj.gcampus.j_g_campus_test.logic.GameManagerGCampus;
 import tn743.ufrrj.gcampus.j_g_campus_test.logic.HangmanLogic;
 
 public class HangFragment extends Fragment {
@@ -33,6 +37,8 @@ public class HangFragment extends Fragment {
     private int mIDBtnRecoveryLetters = 0;
     private int mIDBtnGuessAnswer = 0;
     private int mIDBtnListCharacter = 0;
+
+    private MyBroadcastReceive mReceive = null;
 
     public HangFragment() {
         // Required empty public constructor
@@ -52,29 +58,32 @@ public class HangFragment extends Fragment {
         TransitionInflater inflater = TransitionInflater.from(requireContext());
         setExitTransition(inflater.inflateTransition(R.transition.fade));
         setEnterTransition(inflater.inflateTransition(R.transition.slide_top));
+        mReceive = new MyBroadcastReceive();
+        LocalBroadcastManager.getInstance(getActivity()).registerReceiver(mReceive, new IntentFilter("guest-word-to-answer"));
+
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
+        Log.d(TAG, "onCreateView");
         View view = inflater.inflate(R.layout.fragment_hang, container, false);
         mHangmanLayout = view.findViewById(R.id.llhangman);
 
-        mHangmanLogic = new HangmanLogic();
+
+
+
         String stype = getArguments().getString("TYPE");
-        String sparams = getArguments().getString("PARAM");
+
         if (stype.compareTo("WEB")==0){
-            mHangmanLogic.getWords(sparams);
+            mHangmanLogic = GameManagerGCampus.getInstance().getLastHangman();
+
         }else{
-            mHangmanLogic.load(sparams);
+            int index = getArguments().getInt("game-logic");
+
+            mHangmanLogic = GameManagerGCampus.getInstance().getHangman(index);
 
         }
-
-
-
-
-
-
 
 
         int id = 0;
@@ -192,27 +201,35 @@ public class HangFragment extends Fragment {
         }//for (int i = 0; i < mGroupsTextView.size(); i++){
 
     }
+
+    private void guessAnswer(String s){
+        if (mHangmanLogic.guessAnswer(s)){
+            getWords();
+            changeColorTextView();
+        }else
+            Toast.makeText(getContext(), "Resposta errada. Perdeu ponto!", Toast.LENGTH_SHORT).show();
+    }//private void guessAnswer(String s){
+    private void getWords(){
+        for (int i = 0; i < mGroupsTextView.size(); i++){
+            TextView[] textviews = mGroupsTextView.get(i);
+            String mask = mHangmanLogic.getMask(i);
+            for (int j = 0; j < mask.length(); j++){
+                TextView text = textviews[j];
+                String s = mask.substring(j, j+1);
+                if (s.compareTo("#") !=0 ){
+                    text.setText(s);
+                    //text.setBackgroundColor(getResources().getColor(R.color.green));
+                }//if (s.compareTo("#") !=0 ){
+            }//for (int j = 0; j < mask.length(); j++){
+        }//for (int i = 0; i < mGroupsTextView.size(); i++){
+    }//private void getWords(){
     private void btnOnClickWord(View v){
         int id = v.getId();
         if (id == mIDBtnRecoveryLetters){
             Toast.makeText(getContext(), "Recuperar letras", Toast.LENGTH_SHORT).show();
             boolean ret = mHangmanLogic.recoveryLetters();
             if (ret){
-                for (int i = 0; i < mGroupsTextView.size(); i++){
-                    TextView[] textviews = mGroupsTextView.get(i);
-                    String mask = mHangmanLogic.getMask(i);
-                    for (int j = 0; j < mask.length(); j++){
-                        TextView text = textviews[j];
-                        String s = mask.substring(j, j+1);
-                        if (s.compareTo("#") !=0 ){
-                            text.setText(s);
-                            //text.setBackgroundColor(getResources().getColor(R.color.green));
-                        }
-
-                    }
-
-
-                }//for (int i = 0; i < mGroupsTextView.size(); i++){
+                getWords();
                 changeColorTextView();
             }//if (ret){
             else{
@@ -234,7 +251,7 @@ public class HangFragment extends Fragment {
             int index = getActivity().getSupportFragmentManager().getFragments().size();
             Log.d(TAG, Integer.toString(index));
 
-            GuessWorldFragment guess = new GuessWorldFragment();
+            GuessWordFragment guess = new GuessWordFragment();
             getActivity().getSupportFragmentManager().beginTransaction()
                 .replace(R.id.challengePlay_fragmentView, guess)
                 .addToBackStack(null)
@@ -263,4 +280,15 @@ public class HangFragment extends Fragment {
         super.onDestroy();
     }
 
+    private class MyBroadcastReceive extends BroadcastReceiver{
+
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            if (intent != null){
+                String msg = intent.getStringExtra("answer");
+                Log.d(TAG, msg);
+                guessAnswer(msg);
+            }//if (intent != null){
+        }//public void onReceive(Context context, Intent intent) {
+    }//private class MyBroadcastReceive extends BroadcastReceiver{
 }//public class HangFragment extends Fragment

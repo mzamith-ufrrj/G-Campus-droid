@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
+import android.util.Log;
 
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -23,46 +24,42 @@ public class ChallengePlayActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         //EdgeToEdge.enable(this);
         setContentView(R.layout.activity_challenge_play);
-        String opt = null;
+        String opt = null,
+              opt2 = null;
+
         Intent indent = getIntent();
         if (indent != null) {
-            opt = indent.getStringExtra("game").toUpperCase();
-            if (opt.compareTo("FORCA") == 0){
-                GameManagerGCampus.getInstance().getHangman(this);
-                //1 - obter novos do servidor
-                //2 - listar os gravados e não resolvidos no telefone
-                //3 - se resolvido apagar o desafio do servidor
+            opt = indent.getStringExtra("type");
+            opt2 = indent.getStringExtra("game");
+            if (opt.compareTo("WEB")==0){
+                if (opt2.compareTo("Forca") == 0)
+                    GameManagerGCampus.getInstance().getHangman(this);
 
-
-                /*
-                HangFragment frag = new HangFragment();
-                getSupportFragmentManager().beginTransaction()
-                        .replace(R.id.challengePlay_fragmentView, frag)
-                        .addToBackStack(null)
-                        .setReorderingAllowed(true)
-                        .commit();
-
-                */
-                return;
+            }else if (opt.compareTo("FILE")==0){
+                showHangman(FILE);
+                Log.d(TAG, "LOAD FROM FILE");
             }
+
+
+
         }//if (indent != null) {
     }//protected void onCreate(Bundle savedInstanceState) {
 
     /*
     * Callback called by http connection
      */
-    public void  showHangman(String s, int t){
+    public void  showHangman(int t){
 
         Bundle b = new Bundle();
         switch (t){
             case WEB:
                 b.putString("TYPE", "WEB");
-                b.putString("PARAM", s);
+                //b.putString("PARAM", s);
 
                 break;
             case FILE:
                 b.putString("TYPE", "FILE");
-                b.putString("PARAM", s);
+                //b.putString("PARAM", s);
                 break;
 
         }

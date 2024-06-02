@@ -62,12 +62,22 @@ public class ChallengesActivity extends AppCompatActivity {
         LocalBroadcastManager.getInstance(this).registerReceiver(mMessageReceiver, new IntentFilter("selected-challenge"));
     }
     private void nextActivity(int opt) {
-        ChallengeFun f = mListOpt.get(opt);
-
         Intent intent = null;
-
         intent = new Intent(this, ChallengePlayActivity.class);
-        intent.putExtra("game", f.getName());
+        if (!mType) {
+            ChallengeFun f = mListOpt.get(opt);
+            intent.putExtra("type", "WEB");
+            intent.putExtra("game", f.getName());
+            //Colocar aqui que é para pegar da web
+        }else{
+            FunChallengeProgress f = mListOptInProgress.get(opt);
+            intent.putExtra("type", "FILE");
+            intent.putExtra("game-logic", f.getGameLogic());
+            //Coolocar aqui que é para pegar do arquivo
+
+        }
+
+
         startActivity(intent);
 
     }//private void nextActivity(int opt) {

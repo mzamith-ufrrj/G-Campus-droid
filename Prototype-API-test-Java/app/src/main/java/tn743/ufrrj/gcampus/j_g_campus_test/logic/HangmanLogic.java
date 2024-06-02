@@ -14,26 +14,45 @@ import java.util.Vector;
  Each character of each word has a score, 100%. Once player gets a helping,
  the score is reduced in according to the characters used
  */
-public class HangmanLogic {
+public class HangmanLogic  implements  Game{
     private static final String TAG = "HangmanLogic";
-    private double mPlayers = 0.0;
-    private double mAttempt = 0.0;
-    private double mWLetters = 0.0f;
-    private double score = 0.0f;
 
     private Vector<String> mWords = null;
     private Vector<String> mMask = null;
+    private boolean[] mAnswered = null;
     private String mTheme = null;
 
     private String mGameID = null;
+    private boolean mGameOff = false;
     public HangmanLogic(){
-        mPlayers = 4.0;
-        mAttempt = 0.25;
+
         mWords = new Vector<String>();
         mMask = new Vector<String>();
     }//public HangmanLogic(){
 
     public int Words() { return mWords.size(); }
+
+    public boolean guessAnswer(String s){
+        int indexL = 0;
+        boolean flag = false;
+        while ((indexL < mWords.size()) && (!flag)){
+            String word = mWords.get(indexL);
+            flag = (word.compareTo(s) == 0);
+            indexL++;
+        }
+        if (flag){
+            indexL--;
+            if (!mAnswered[indexL]){
+                mMask.set(indexL, new String(s) );
+                mAnswered[indexL] = true;
+                return true;
+            }//if (!mAnswered[indexL]){
+
+        }//if (flag){
+
+
+        return false;
+    }//public boolean guessAnswer(String s){
 
     public String getTheme() {return new String(mTheme);}
     public String getWord(int index){
@@ -56,21 +75,32 @@ public class HangmanLogic {
             mWords.add(new String(parts[i]));
         }
 
-        mWLetters = 0.0f;
-        for (int i = 0; i < mWords.size(); i++){
-            mWLetters += mWords.get(i).length();
-        }//for (int i = 0; i < mWords.size(); i++){
 
+
+        mAnswered = new boolean[mWords.size()];
         mMask.clear();
         for (int i = 0; i < mWords.size(); i++){
             String word = mWords.get(i);
             String mask = "#".repeat(word.length());
             mMask.add(new String(mask));
+            mAnswered[i] = false;
         }
+
 
 
         //7+7+6=20
     }//public void getWords(){
+    @Override
+    public boolean gameoff() { return mGameOff; }
+
+    @Override
+    public int getScore() {
+        int score = 0;
+        for (int i = 0; i < mAnswered.length; i++){
+            if (mAnswered[i]) score++;
+        }
+        return score;
+    }
 
     public boolean recoveryLetters(){
         assert mWords.size() == mMask.size():"Erro between Word and Mask";
@@ -85,6 +115,17 @@ public class HangmanLogic {
             mask = new String(inout_answer);
             mMask.set(i, mask);
         }//for (int i = 0; i < mWords.size()){
+
+        if (ret){
+            for (int i = 0; i < mWords.size(); i++) {
+                if (!mAnswered[i]){
+                    String word = mWords.get(i);
+                    String mask = mMask.get(i);
+                    mAnswered[i] = (word.compareTo(mask) == 0);
+                }
+
+            }// for (int i = 0; i < mWords.size(); i++) {
+        }//if (ret){
         return ret;
     }//public void recoveryLetters(){
 
@@ -98,18 +139,28 @@ public class HangmanLogic {
             mTheme = br.readLine();
             String line;
             mWords.clear();
-            boolean state = false;
+            int state = 0, index = 0;
             while ((line = br.readLine()) != null) {
-                int i = line.indexOf("MASK");
-                if (i < 0){
-                    if (!state)
-                        mWords.add(new String (line));
-                    else
+                int i = -1;
+
+                if (state == 0) {
+                    i = line.indexOf("MASK");
+                    if (i == -1)
+                        mWords.add(new String(line));
+
+                }else if (state == 1){
+                    i = line.indexOf("ANSWER");
+                    if (i == -1)
                         mMask.add(new String (line));
-                }else{
-                    state = true;
+                    else
+                        mAnswered = new boolean[mWords.size()];
+                }
+                else if (state == 2){
+
+                    mAnswered[index++] = Boolean.parseBoolean(line);
                 }
 
+                if (i != -1)state++;
                 /*
                 String[] token = line.split("=");
                 String param = token[0].trim();
@@ -130,6 +181,7 @@ public class HangmanLogic {
         } catch (IOException e) {
             Log.e(TAG, "loadConfig():  is not loaded [ERROR]");
         }
+
     }
     public void save(String path){
         String filename = path + "/hangman." + mGameID;
@@ -146,6 +198,12 @@ public class HangmanLogic {
             text += word + "\n";
         }//for (int i = 0; i < mWords.size(); i++) {
 
+        text += "ANSWER\n";
+        for (int i = 0; i < mAnswered.length; i++) {
+            String word = Boolean.toString(mAnswered[i]);
+            text += word + "\n";
+        }//for (int i = 0; i < mWords.size(); i++) {
+
         try {
             FileWriter writer = new FileWriter(filename);
             writer.write(text);
@@ -156,4 +214,6 @@ public class HangmanLogic {
 
         GameManagerGCampus.getInstance().loadChallengesInProgress();
     }//public void save(String path){
+
+
 }//public class HangmanLogic {

@@ -1,9 +1,10 @@
 package tn743.ufrrj.gcampus.j_g_campus_test.gui.frag;
 
+import android.content.Intent;
 import android.os.Bundle;
 
 import androidx.fragment.app.Fragment;
-import androidx.fragment.app.FragmentManager;
+import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
 import android.transition.TransitionInflater;
 import android.util.DisplayMetrics;
@@ -12,13 +13,16 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.util.Log;
+import android.widget.EditText;
+
 import tn743.ufrrj.gcampus.j_g_campus_test.R;
 
-public class GuessWorldFragment extends Fragment {
+public class GuessWordFragment extends Fragment {
     private static final String TAG = "GuessWorldFragment";
     private Button mBtnSend = null;
     private Button mBtnCancel= null;
-    public GuessWorldFragment() {
+    private EditText mAnwser = null;
+    public GuessWordFragment() {
         // Required empty public constructor
     }
 
@@ -34,10 +38,15 @@ public class GuessWorldFragment extends Fragment {
         //
         if (v.getId() == R.id.btnSend){
             Log.d(TAG, "Send answer");
+            Intent intent = new Intent("guest-word-to-answer");
+            intent.putExtra("answer", mAnwser.getText().toString());
+            LocalBroadcastManager.getInstance(getContext()).sendBroadcast(intent);
+            getActivity().onBackPressed();
             return;
         }//if (v.getId() == R.id.btnSend){
         if (v.getId() == R.id.btnCancel){
             Log.d(TAG, "Send cancel");
+            getActivity().onBackPressed();
             return;
         }//if (v.getId() == R.id.btnSend){
 
@@ -47,7 +56,8 @@ public class GuessWorldFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        View view =inflater.inflate(R.layout.fragment_guess_world, container, false);
+        View view =inflater.inflate(R.layout.fragment_guess_word, container, false);
+        mAnwser = view.findViewById(R.id.edtGuessWord);
         mBtnSend = view.findViewById(R.id.btnSend);
         mBtnCancel = view.findViewById(R.id.btnCancel);
         mBtnSend.setOnClickListener(v -> onBtnClick(v));
