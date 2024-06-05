@@ -53,8 +53,8 @@ public class MainActivity extends AppCompatActivity {
         LocalBroadcastManager.getInstance(this).registerReceiver(mMessageReceiver, new IntentFilter("selected-test"));
 
         Configure.getInstance().setContext(getApplicationContext());
-        GameManagerGCampus.getInstance().init(getApplicationContext());
-        GameManagerGCampus.getInstance().loadChallengesInProgress();
+        GameManagerGCampus.getInstance().setContext(getApplicationContext());
+        //GameManagerGCampus.getInstance().loadChallengesInProgress();
 
     }//protected void onCreate(Bundle savedInstanceState) {
     @Override

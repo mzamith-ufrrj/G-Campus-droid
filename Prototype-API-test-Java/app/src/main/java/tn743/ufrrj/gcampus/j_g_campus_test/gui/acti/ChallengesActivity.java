@@ -72,7 +72,8 @@ public class ChallengesActivity extends AppCompatActivity {
         }else{
             FunChallengeProgress f = mListOptInProgress.get(opt);
             intent.putExtra("type", "FILE");
-            intent.putExtra("game-logic", f.getGameLogic());
+            int index = f.getIndex();
+            intent.putExtra("game-logic", index);
             //Coolocar aqui que é para pegar do arquivo
 
         }

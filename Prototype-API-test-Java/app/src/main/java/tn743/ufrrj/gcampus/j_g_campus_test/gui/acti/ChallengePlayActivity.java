@@ -27,6 +27,7 @@ public class ChallengePlayActivity extends AppCompatActivity {
         String opt = null,
               opt2 = null;
 
+        int fileindex = -1;
         Intent indent = getIntent();
         if (indent != null) {
             opt = indent.getStringExtra("type");
@@ -36,7 +37,8 @@ public class ChallengePlayActivity extends AppCompatActivity {
                     GameManagerGCampus.getInstance().getHangman(this);
 
             }else if (opt.compareTo("FILE")==0){
-                showHangman(FILE);
+                fileindex = indent.getIntExtra("game-logic", -1);
+                showHangman(FILE, fileindex);
                 Log.d(TAG, "LOAD FROM FILE");
             }
 
@@ -48,7 +50,7 @@ public class ChallengePlayActivity extends AppCompatActivity {
     /*
     * Callback called by http connection
      */
-    public void  showHangman(int t){
+    public void  showHangman(int t, int fileindex){
 
         Bundle b = new Bundle();
         switch (t){
@@ -59,7 +61,7 @@ public class ChallengePlayActivity extends AppCompatActivity {
                 break;
             case FILE:
                 b.putString("TYPE", "FILE");
-                //b.putString("PARAM", s);
+                b.putInt("FILEINDEX", fileindex);
                 break;
 
         }

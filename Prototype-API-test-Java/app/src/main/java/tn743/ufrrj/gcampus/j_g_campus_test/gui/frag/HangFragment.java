@@ -55,6 +55,7 @@ public class HangFragment extends Fragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         Log.d(TAG, "onCreate");
+        //GameManagerGCampus.getInstance().loadChallengesInProgress();
         TransitionInflater inflater = TransitionInflater.from(requireContext());
         setExitTransition(inflater.inflateTransition(R.transition.fade));
         setEnterTransition(inflater.inflateTransition(R.transition.slide_top));
@@ -75,15 +76,20 @@ public class HangFragment extends Fragment {
 
         String stype = getArguments().getString("TYPE");
 
+        String output = new String ("");
         if (stype.compareTo("WEB")==0){
             mHangmanLogic = GameManagerGCampus.getInstance().getLastHangman();
+            output = "WEB: FILENAME:" + mHangmanLogic.getGameID() + " <---";
 
         }else{
-            int index = getArguments().getInt("game-logic");
-
+            int index = getArguments().getInt("FILEINDEX");
             mHangmanLogic = GameManagerGCampus.getInstance().getHangman(index);
+            output = "FILEINDEX (" + Integer.toString(index) + ") : FILENAME:" + mHangmanLogic.getGameID() + " <---";
 
         }
+//TO DEBUG
+        Log.d(TAG, output);
+
 
 
         int id = 0;
@@ -186,28 +192,38 @@ public class HangFragment extends Fragment {
     Method used to catch button event
      */
     private void changeColorTextView(){
+        Log.d(TAG, "changeColorTextView 1 =" + Integer.toString(mGroupsTextView.size()));
         for (int i = 0; i < mGroupsTextView.size(); i++){
             TextView[] textviews = mGroupsTextView.get(i);
             String mask = mHangmanLogic.getMask(i);
-            for (int j = 0; j < mask.length(); j++){
-                TextView text = textviews[j];
-                String s = mask.substring(j, j+1);
-                if (s.compareTo("#") !=0 ){
-                    text.setText(s);
-                    text.setBackgroundColor(getResources().getColor(R.color.green));
+            if (mask != null){
+                for (int j = 0; j < mask.length(); j++){
+                    TextView text = textviews[j];
+                    String s = mask.substring(j, j+1);
+                    if (s.compareTo("#") !=0 ){
+                        text.setText(s);
+                        text.setBackgroundColor(getResources().getColor(R.color.green));
+                    }
                 }
-            }
+            }else
+                Toast.makeText(getContext(), "ERROR in MASK string ", Toast.LENGTH_SHORT).show();
+
 
         }//for (int i = 0; i < mGroupsTextView.size(); i++){
-
+        //mHangmanLogic.save(getContext().getFilesDir().toString());
     }
 
     private void guessAnswer(String s){
-        if (mHangmanLogic.guessAnswer(s)){
+
+
+        if (mHangmanLogic.guessAnswer(s, TAG)){
             getWords();
             changeColorTextView();
+
         }else
             Toast.makeText(getContext(), "Resposta errada. Perdeu ponto!", Toast.LENGTH_SHORT).show();
+
+
     }//private void guessAnswer(String s){
     private void getWords(){
         for (int i = 0; i < mGroupsTextView.size(); i++){
@@ -274,20 +290,37 @@ public class HangFragment extends Fragment {
     }//private void btnOnClickWord(View v){
 
     @Override
-    public void onDestroy() {
-        mHangmanLogic.save(getContext().getFilesDir().toString());
-
-        super.onDestroy();
+    public void onPause(){
+        super.onPause();
     }
 
+    @Override
+    public void onStop(){
+        GameManagerGCampus.getInstance().setChallengesInProgress();
+        //GameManagerGCampus.getInstance().setChallengesInProgress();
+
+        super.onStop();
+    }
+
+    @Override
+    public void onDestroyView() {
+
+        super.onDestroyView();
+    }
+
+    @Override
+    public void onDestroy(){
+        LocalBroadcastManager.getInstance(getActivity()).unregisterReceiver(mReceive);
+        super.onDestroy();
+    }
     private class MyBroadcastReceive extends BroadcastReceiver{
 
         @Override
         public void onReceive(Context context, Intent intent) {
             if (intent != null){
                 String msg = intent.getStringExtra("answer");
-                Log.d(TAG, msg);
-                guessAnswer(msg);
+                Log.d(TAG, "onReceive \t" + msg);
+                guessAnswer(msg.trim());
             }//if (intent != null){
         }//public void onReceive(Context context, Intent intent) {
     }//private class MyBroadcastReceive extends BroadcastReceiver{

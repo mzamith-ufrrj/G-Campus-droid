@@ -38,7 +38,8 @@ public class FunChallengeProgressAdapter extends RecyclerView.Adapter<FunChallen
     public void onBindViewHolder(@NonNull FunChallengeProgressViewHolder holder, int position) {
         FunChallengeProgress item = mList.get(position);
         TextView textView = holder.mChallenge;
-        textView.setText(item.getChallengeType());
+        String challenge = new String(item.getChallengeType() + "<" + item.getGameID() + "><" + Integer.toString(item.getIndex()) + ">");
+        textView.setText(challenge);
 
         textView = holder.mTheme;
         textView.setText(item.getTheme());

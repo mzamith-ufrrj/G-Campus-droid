@@ -24,33 +24,51 @@ public class HangmanLogic  implements  Game{
 
     private String mGameID = null;
     private boolean mGameOff = false;
+
+    private boolean mUpdate = false;
     public HangmanLogic(){
 
         mWords = new Vector<String>();
         mMask = new Vector<String>();
+        mUpdate = false;
     }//public HangmanLogic(){
 
+    public HangmanLogic(boolean update){
+        mWords = new Vector<String>();
+        mMask = new Vector<String>();
+        mUpdate = update;
+    }
     public int Words() { return mWords.size(); }
 
-    public boolean guessAnswer(String s){
+    public String getGameID() { return mGameID; }
+    public boolean guessAnswer(String s, String callTAG){
+        Log.d(callTAG, "\tmHangmanLogic.guessAnswer 1");
         int indexL = 0;
         boolean flag = false;
+        Log.d(callTAG, "\tmHangmanLogic.guessAnswer 2");
         while ((indexL < mWords.size()) && (!flag)){
             String word = mWords.get(indexL);
             flag = (word.compareTo(s) == 0);
             indexL++;
         }
+        Log.d(callTAG, "\tmHangmanLogic.guessAnswer 3");
         if (flag){
             indexL--;
             if (!mAnswered[indexL]){
+                mUpdate = true;
                 mMask.set(indexL, new String(s) );
                 mAnswered[indexL] = true;
+                Log.d(callTAG, "\tmHangmanLogic.guessAnswer 4.a");
                 return true;
-            }//if (!mAnswered[indexL]){
+            }else {//if (!mAnswered[indexL]){
+                Log.d(callTAG, "\tmHangmanLogic.guessAnswer 4.b");
+                return mAnswered[indexL];
+            }
 
+            //Log.d(callTAG, "\tmHangmanLogic.guessAnswer 4.c");
         }//if (flag){
 
-
+        //Log.d(callTAG, "\tmHangmanLogic.guessAnswer 5");
         return false;
     }//public boolean guessAnswer(String s){
 
@@ -64,10 +82,10 @@ public class HangmanLogic  implements  Game{
         if ((index  < 0) || (index >= mMask.size())) return null;
         return new String(mMask.get(index));
     }
-    public void getWords(String msg){
+    public void setWords(String msg){
         String[] parts = msg.split("\n");
         int len = parts.length;
-        mGameID = new String(parts[0]);
+        mGameID = new String("/hangman." + parts[0]);
         mTheme = new String(parts[1]);
 
         mWords.clear();
@@ -117,6 +135,7 @@ public class HangmanLogic  implements  Game{
         }//for (int i = 0; i < mWords.size()){
 
         if (ret){
+            mUpdate = true;
             for (int i = 0; i < mWords.size(); i++) {
                 if (!mAnswered[i]){
                     String word = mWords.get(i);
@@ -129,7 +148,9 @@ public class HangmanLogic  implements  Game{
         return ret;
     }//public void recoveryLetters(){
 
-    public void load (String filename){
+
+    @Override
+    public boolean loadState(String filename){
         File file = new File(filename);
         FileReader fr = null;
         try {
@@ -161,18 +182,7 @@ public class HangmanLogic  implements  Game{
                 }
 
                 if (i != -1)state++;
-                /*
-                String[] token = line.split("=");
-                String param = token[0].trim();
-                if (param.compareTo("URL") == 0) {
-                    mMainURL = new String(token[1].trim());
-                } else if (param.compareTo("USER") == 0) {
-                    mUser = new String(token[1].trim());
-                } else if (param.compareTo("PASSWD") == 0) {
-                    mPass = new String(token[1].trim());
-                }
 
-                 */
             }// while((line = br.readLine()) != null){
 
 
@@ -181,10 +191,14 @@ public class HangmanLogic  implements  Game{
         } catch (IOException e) {
             Log.e(TAG, "loadConfig():  is not loaded [ERROR]");
         }
-
+        return true;
     }
-    public void save(String path){
-        String filename = path + "/hangman." + mGameID;
+
+    @Override
+    public int saveState(String path){
+        if (!mUpdate) return 0;
+
+        String filename = path +  mGameID;
         String text = mGameID + "\n"
                     + mTheme  + "\n";
         for (int i = 0; i < mWords.size(); i++) {
@@ -210,10 +224,13 @@ public class HangmanLogic  implements  Game{
             writer.close();
         } catch (IOException e) {
             Log.e(TAG, "save(): " + filename + " is not salved [ERROR]");
+            return -1;
         }
-
-        GameManagerGCampus.getInstance().loadChallengesInProgress();
+        mUpdate = false;
+        return 1;
     }//public void save(String path){
+
+
 
 
 }//public class HangmanLogic {

@@ -41,6 +41,7 @@ public class GuessWordFragment extends Fragment {
             Intent intent = new Intent("guest-word-to-answer");
             intent.putExtra("answer", mAnwser.getText().toString());
             LocalBroadcastManager.getInstance(getContext()).sendBroadcast(intent);
+
             getActivity().onBackPressed();
             return;
         }//if (v.getId() == R.id.btnSend){

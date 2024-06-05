@@ -5,4 +5,7 @@ public interface Game {
 
     boolean gameoff();
     int getScore();
+
+    int saveState(String path);
+    boolean loadState(String filename);
 }
