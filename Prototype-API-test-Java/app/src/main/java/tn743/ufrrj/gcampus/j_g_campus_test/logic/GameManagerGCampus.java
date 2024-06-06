@@ -20,7 +20,6 @@ import java.util.Vector;
 import tn743.ufrrj.gcampus.j_g_campus_test.comm.HttpCOMM;
 import tn743.ufrrj.gcampus.j_g_campus_test.comm.HttpCOMMRun;
 import tn743.ufrrj.gcampus.j_g_campus_test.gui.acti.ChallengePlayActivity;
-import tn743.ufrrj.gcampus.j_g_campus_test.menuchallenges.ChallengeFun;
 import tn743.ufrrj.gcampus.j_g_campus_test.menuchallengesinprogress.FunChallengeProgress;
 
 /*
@@ -38,7 +37,8 @@ public class GameManagerGCampus {
     private Handler mHandlerHangman = null;
     private ChallengePlayActivity mChallengePlayActivity = null;
 
-    private Vector<HangmanLogic> mHangsman = null;
+    private Vector<HangmanLogic> mHangsmanInProgress = null,
+                                 mHangsmanConcluded = null;
     private Vector<String> mFilesGames = null; /* struct with the file name of each game in progress or finalized */
     //private static String mConfigFile = "GameManger.config";
     //private HashMap<String, String> mFilesName = null;
@@ -75,7 +75,7 @@ public class GameManagerGCampus {
                     mFilesGames.add(hl.getGameID());
                     hl.saveState(mContext.getFilesDir().toString());
                     saveFileStructure();
-                    mHangsman.add(hl);
+                    mHangsmanInProgress.add(hl);
                     mChallengePlayActivity.showHangman(0, -1);
                 }else {
                     Toast.makeText(mContext, "Desafio já baixado!", Toast.LENGTH_SHORT).show();
@@ -84,7 +84,8 @@ public class GameManagerGCampus {
             }
         };
 
-        if (mHangsman == null)  mHangsman = new Vector<HangmanLogic>();
+        if (mHangsmanInProgress == null)  mHangsmanInProgress = new Vector<HangmanLogic>();
+        if (mHangsmanConcluded == null)  mHangsmanConcluded = new Vector<HangmanLogic>();
         if (mFilesGames == null) mFilesGames = new Vector<String>();
     }
 
@@ -105,9 +106,9 @@ public class GameManagerGCampus {
     }
 
 
-    public HangmanLogic getLastHangman() { return mHangsman.get(mHangsman.size()-1); }
+    public HangmanLogic getLastHangman() { return mHangsmanInProgress.get(mHangsmanInProgress.size()-1); }
 
-    public HangmanLogic getHangman(int index) { return mHangsman.get(index); }
+    public HangmanLogic getHangmanInProgress(int index) { return mHangsmanInProgress.get(index); }
 
     private void loadFileStructure(){
         String filename = mContext.getFilesDir() + "/games-file-list.txt";
@@ -151,8 +152,8 @@ public class GameManagerGCampus {
         }
     }//private void saveFileStructure(){
     public void setChallengesInProgress(){
-        for (int i = 0; i < mHangsman.size(); i++){
-            HangmanLogic hl = mHangsman.get(i);
+        for (int i = 0; i < mHangsmanInProgress.size(); i++){
+            HangmanLogic hl = mHangsmanInProgress.get(i);
             int ret = hl.saveState(mContext.getFilesDir().toString());
             String msg = new String("Não definido");
             switch (ret){
@@ -172,8 +173,8 @@ public class GameManagerGCampus {
     private void loadChallengesInProgress(){
         mListInProgress = null;
         mListInProgress = new ArrayList<FunChallengeProgress>();
-        for (int i = 0 ;i < mHangsman.size(); i++){
-            HangmanLogic hl = mHangsman.get(i);
+        for (int i = 0; i < mHangsmanInProgress.size(); i++){
+            HangmanLogic hl = mHangsmanInProgress.get(i);
             String theme = hl.getTheme();
             String gameid = hl.getGameID();
             FunChallengeProgress fun = new FunChallengeProgress("Forca",
@@ -190,14 +191,18 @@ public class GameManagerGCampus {
         File dir     = new File(mContext.getFilesDir().toString()) ;
 
         //The first type is HANGMAN
-        mHangsman.clear();
+        mHangsmanInProgress.clear();
+        mHangsmanConcluded.clear();
         for (int i = 0; i < mFilesGames.size(); i++){
             String filename = mFilesGames.get(i);
 
             if ((filename.toString().indexOf("hangman.") >= 0)){
                 HangmanLogic hl = new HangmanLogic();
                 hl.loadState( dir + filename);
-                mHangsman.add(hl);
+                if (!hl.gameConcluded())
+                    mHangsmanInProgress.add(hl);
+                else
+                    mHangsmanConcluded.add(hl);
             }
         }//for (int i = 0; i < mFilesGames.size(); i++){
 

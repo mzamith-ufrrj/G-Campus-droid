@@ -82,25 +82,5 @@ public class ChallengePlayActivity extends AppCompatActivity {
         if (getSupportFragmentManager().getBackStackEntryCount() == 0){
             finish();
         }
-
-
-        /*
-        if (fm.getBackStackEntryCount() > 0) {
-            Log.d(TAG, "popping backstack");
-            fm.popBackStack();
-        } else {
-            Log.d(TAG, "nothing on backstack, calling super");
-            super.onBackPressed();
-        }
-
-         */
-        /*
-        super.onBackPressed();
-        //FragmentManager fm = getSupportFragmentManager();
-        //fm.popBackStack();
-        getSupportFragmentManager().popBackStack();
-
-         */
-        //finish();
-    }
+    }//public void onBackPressed(){
 }//public class ChallengePlayActivity extends AppCompatActivity {
