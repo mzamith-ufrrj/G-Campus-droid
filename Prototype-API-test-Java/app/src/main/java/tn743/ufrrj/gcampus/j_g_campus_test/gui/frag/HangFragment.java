@@ -1,16 +1,20 @@
 package tn743.ufrrj.gcampus.j_g_campus_test.gui.frag;
 
+
+
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.os.Bundle;
 
 import androidx.fragment.app.Fragment;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
 import android.transition.TransitionInflater;
+import android.util.Base64;
 import android.util.DisplayMetrics;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -40,6 +44,7 @@ public class HangFragment extends Fragment {
 
     private MyBroadcastReceive mReceive = null;
 
+    private ImageView mPhoto = null;
     public HangFragment() {
         // Required empty public constructor
         //Example of letters aquiring
@@ -176,10 +181,22 @@ public class HangFragment extends Fragment {
         btn.setBackgroundColor(getResources().getColor(R.color.blue_ufrrj));
         btn.setTextColor(getResources().getColor(R.color.white));
         mHangmanLayout.addView(btn);
-        ImageView iView = new ImageView(getContext());
-        iView.setId(id+2);
-        iView.setImageBitmap(setImage());
-        mHangmanLayout.addView(iView);
+
+
+        params = new LinearLayout.LayoutParams(wp, wp);
+        mPhoto = new ImageView(getContext());
+        mPhoto.setId(id+2);
+        mPhoto.setLayoutParams(params);
+
+
+
+        byte[] b = Base64.decode(mHangmanLogic.getPhoto64(), Base64.DEFAULT);
+        Bitmap bitmap = BitmapFactory.decodeByteArray(b, 0, b.length);
+
+        mPhoto.setImageBitmap(bitmap);
+
+        mHangmanLayout.addView(mPhoto);
+
 
 
 
@@ -189,11 +206,7 @@ public class HangFragment extends Fragment {
         return view;
     }//public View onCreateView
 
-    private Bitmap setImage(){
-        Bitmap.Config conf = Bitmap.Config.ARGB_8888; // see other conf types
-        Bitmap bmp = Bitmap.createBitmap(180, 180, conf); // this creates a MUTABLE bitmap
-        return bmp;
-    }
+
     @Override
     public void onDestroy(){
         LocalBroadcastManager.getInstance(getActivity()).unregisterReceiver(mReceive);
@@ -217,9 +230,13 @@ public class HangFragment extends Fragment {
     }//private void changeColorTextView(){
 
     private void guessAnswer(String s){
-        if (mHangmanLogic.guessAnswer(s, TAG)){
+        if (mHangmanLogic.guessAnswer(s)){
             getWord();
             changeColorTextView();
+            byte[] b = Base64.decode(mHangmanLogic.getPhoto64(), Base64.DEFAULT);
+            Bitmap bitmap = BitmapFactory.decodeByteArray(b, 0, b.length);
+
+            mPhoto.setImageBitmap(bitmap);
 
         }else
           Toast.makeText(getContext(), "Resposta errada. Perdeu ponto!", Toast.LENGTH_SHORT).show();

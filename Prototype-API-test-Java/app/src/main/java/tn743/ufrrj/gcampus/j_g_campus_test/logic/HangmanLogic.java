@@ -19,6 +19,10 @@ public class HangmanLogic  implements  Game{
 
     private String mWord = null;
     private String mMask = null;
+    private String mPhoto64 = null;
+
+    private static final String mWhite64 = "iVBORw0KGgoAAAANSUhEUgAAAHAAAABwCAQAAABP0K1bAAAAV0lEQVR42u3PMQEAAAwCoNm/9Cr4Cw3A0kEAQAAAAAAAwEyjIPzKcoAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
+
 
     private boolean mAnswered = false;
     private String mTheme = null;
@@ -42,7 +46,7 @@ public class HangmanLogic  implements  Game{
     //public int Words() { return mWords.size(); }
 
     public String getGameID() { return mGameID; }
-    public boolean guessAnswer(String s, String callTAG){
+    public boolean guessAnswer(String s){
         boolean flag = false;
         if (mWord.compareTo(s) == 0){
             if (!mAnswered){
@@ -58,6 +62,12 @@ public class HangmanLogic  implements  Game{
     public String getWord(){ return new String(mWord); }
     public String getMask(){ return new String(mMask);}
 
+    public String getPhoto64() {
+        if (mAnswered)
+            return new String(mPhoto64.replace("<PHOTO>", ""));
+        else return mWhite64;
+    }
+
     public void setWords(String msg){
         String[] parts = msg.split("\n");
         int len = parts.length;
@@ -66,6 +76,8 @@ public class HangmanLogic  implements  Game{
 
         mWord = new String(parts[2]);
         mMask = new String("#".repeat(mWord.length()));
+
+        mPhoto64 = new String(parts[3]);
         mAnswered = false;
     }//public void getWords(){
     @Override
@@ -102,8 +114,8 @@ public class HangmanLogic  implements  Game{
             mTheme = new String(br.readLine());
             mWord = new String(br.readLine());
             mMask = new String(br.readLine());
-
             mAnswered = Boolean.parseBoolean(br.readLine());
+            mPhoto64 = new String(br.readLine());
         } catch (FileNotFoundException e) {
             Log.e(TAG, "loadConfig():  is not loaded [ERROR]");
             return false;
@@ -123,7 +135,8 @@ public class HangmanLogic  implements  Game{
                     + mTheme  + "\n"
                     + mWord   + "\n"
                     + mMask   + "\n"
-                    + Boolean.toString(mAnswered) + "\n";
+                    + Boolean.toString(mAnswered) + "\n"
+                    + mPhoto64 + "\n";
 
 
         try {

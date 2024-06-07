@@ -25,6 +25,7 @@
             android:exported="false" />
         <activity
             android:name=".gui.acti.ChallengePlayActivity"
+            android:screenOrientation="portrait"
             android:exported="false" />
         <activity
             android:name=".gui.acti.ChallengesActivity"
